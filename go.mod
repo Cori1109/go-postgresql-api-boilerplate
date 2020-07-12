@@ -11,6 +11,7 @@ require (
 	github.com/gofiber/helmet v0.1.1
 	github.com/joho/godotenv v1.3.0
 	github.com/klauspost/compress v1.10.10 // indirect
+	github.com/lib/pq v1.7.0
 	github.com/mattn/go-shellwords v1.0.10 // indirect
 	gopkg.in/urfave/cli.v1 v1.20.0 // indirect
 )

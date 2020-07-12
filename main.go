@@ -1,6 +1,10 @@
 package main
 
 import (
+	"log"
+
+	"github.com/Badrouu17/go-postgresql-api-boilerplate/config"
+	"github.com/Badrouu17/go-postgresql-api-boilerplate/database"
 	"github.com/Badrouu17/go-postgresql-api-boilerplate/routes"
 	"github.com/gofiber/cors"
 	"github.com/gofiber/fiber"
@@ -9,6 +13,11 @@ import (
 )
 
 func main() {
+	// Connect to database
+	if err := database.Connect(); err != nil {
+		log.Fatal(err)
+	}
+
 	app := fiber.New()
 
 	app.Use(middleware.Logger())
@@ -23,5 +32,5 @@ func main() {
 		c.Send("Hello, World 👋!")
 	})
 
-	app.Listen(3001)
+	app.Listen(config.Dot("PORT"))
 }
