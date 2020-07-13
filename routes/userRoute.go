@@ -11,6 +11,11 @@ func SetupUserRoute(app *fiber.App) {
 	user := app.Group("/api/v1/user")
 
 	// routes
-	user.Get("/", userController.GetUser)
+	user.Get("/getMe", userController.GetUser)
+	user.Patch("/updateMe", userController.GetUser)
+	user.Patch("/updatePassword", userController.GetUser)
+	user.Delete("/deleteMe", userController.GetUser)
+
+	user.Post("/uploadPhotos", userController.GetUser)
 
 }

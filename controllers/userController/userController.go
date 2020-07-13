@@ -5,5 +5,5 @@ import (
 )
 
 func GetUser(ctx *fiber.Ctx) {
-	ctx.Send("hoooooo")
+	ctx.Send("user")
 }

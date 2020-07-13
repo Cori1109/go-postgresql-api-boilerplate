@@ -27,6 +27,7 @@ func main() {
 	app.Use(helmet.New())
 
 	routes.SetupUserRoute(app)
+	routes.SetupAuthRoute(app)
 
 	app.Get("/", func(c *fiber.Ctx) {
 		c.Send("Hello, World 👋!")
