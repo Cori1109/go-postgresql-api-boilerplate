@@ -3,11 +3,10 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"os"
 	"strconv"
 
 	_ "github.com/lib/pq"
-
-	"github.com/Badrouu17/go-postgresql-api-boilerplate/config"
 )
 
 // Database instance
@@ -16,7 +15,7 @@ var DB *sql.DB
 // Connect function
 func Connect() error {
 	var err error
-	p := config.Dot("DB_PORT")
+	p := os.Getenv("DB_PORT")
 	// because our config function returns a string, we are parsing our str to int here
 	port, err := strconv.ParseUint(p, 10, 32)
 
@@ -24,7 +23,7 @@ func Connect() error {
 		fmt.Println("Error parsing str to int")
 	}
 
-	DB, err = sql.Open("postgres", fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", config.Dot("DB_HOST"), port, config.Dot("DB_USER"), config.Dot("DB_PASSWORD"), config.Dot("DB_NAME")))
+	DB, err = sql.Open("postgres", fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", os.Getenv("DB_HOST"), port, os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME")))
 	if err != nil {
 		return err
 	}

@@ -14,7 +14,7 @@ func SignToken(id int) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id":  id,
 		"iat": time.Now().Unix(),
-		"exp": time.Now().Unix() + 90*24*60*60*1000,
+		"exp": time.Now().Unix() + 90*24*60*60,
 	})
 
 	// Sign and get the complete encoded token as a string using the secret

@@ -16,6 +16,4 @@ func SetupUserRoute(app *fiber.App) {
 	user.Patch("/updatePassword", userController.GetUser)
 	user.Delete("/deleteMe", userController.GetUser)
 
-	user.Post("/uploadPhotos", userController.GetUser)
-
 }

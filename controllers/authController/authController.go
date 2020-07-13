@@ -6,6 +6,5 @@ import (
 )
 
 func Signup(ctx *fiber.Ctx) {
-
-	abort.Now(400, "something", ctx)
+	abort.Now(200, "hoooo", ctx)
 }
