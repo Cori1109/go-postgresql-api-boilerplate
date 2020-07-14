@@ -7,7 +7,7 @@ func InsertUser(name, email, password string) string {
 }
 
 func GetUserWithEmail(email string) string {
-	return fmt.Sprintf("SELECT id,name,email,photo,password FROM users_user WHERE users_user.email = '%s'", email)
+	return fmt.Sprintf("SELECT id,name,email,password FROM users_user WHERE users_user.email = '%s'", email)
 }
 
 func GetUserWithId(id int) string {
