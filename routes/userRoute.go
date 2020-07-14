@@ -8,7 +8,7 @@ import (
 
 // SetupUserRoute exported
 func SetupUserRoute(app *fiber.App) {
-	user := app.Group("/api/v1/user")
+	user := app.Group("/api/user")
 
 	// routes
 	user.Get("/getMe", userController.GetUser)

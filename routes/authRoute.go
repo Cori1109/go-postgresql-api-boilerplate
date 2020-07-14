@@ -8,7 +8,7 @@ import (
 
 // SetupUserRoute exported
 func SetupAuthRoute(app *fiber.App) {
-	auth := app.Group("/api/v1/auth")
+	auth := app.Group("/api/auth")
 
 	// routes
 	auth.Post("/signup", authController.Signup)
