@@ -10,6 +10,7 @@ require (
 	github.com/gofiber/fiber v1.12.6
 	github.com/gofiber/helmet v0.1.1
 	github.com/howeyc/fsnotify v0.9.0 // indirect
+	github.com/jmoiron/sqlx v1.2.0
 	github.com/joho/godotenv v1.3.0
 	github.com/klauspost/compress v1.10.10 // indirect
 	github.com/lib/pq v1.7.0

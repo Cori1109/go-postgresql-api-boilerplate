@@ -2,9 +2,9 @@ package jwt
 
 import (
 	"fmt"
+	"os"
 	"time"
 
-	"github.com/Badrouu17/go-postgresql-api-boilerplate/config"
 	"github.com/dgrijalva/jwt-go"
 )
 
@@ -18,9 +18,7 @@ func SignToken(id int) (string, error) {
 	})
 
 	// Sign and get the complete encoded token as a string using the secret
-	tokenString, err := token.SignedString([]byte(config.Dot("JWT_SECRET")))
-
-	fmt.Println(tokenString, "🌹🌹")
+	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
 
 	return tokenString, err
 }
@@ -34,7 +32,7 @@ func CheckToken(tokenString string) bool {
 		}
 
 		// hmacSampleSecret is a []byte containing your secret, e.g. []byte("my_secret_key")
-		return []byte(config.Dot("JWT_SECRET")), nil
+		return []byte(os.Getenv("JWT_SECRET")), nil
 	})
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
