@@ -1,12 +1,16 @@
 package authController
 
 import (
+	"fmt"
+
 	"github.com/Badrouu17/go-postgresql-api-boilerplate/database"
 	"github.com/Badrouu17/go-postgresql-api-boilerplate/queries"
 
 	"github.com/Badrouu17/go-postgresql-api-boilerplate/utils/abort"
+	"github.com/Badrouu17/go-postgresql-api-boilerplate/utils/email"
 	"github.com/Badrouu17/go-postgresql-api-boilerplate/utils/jwt"
 	"github.com/Badrouu17/go-postgresql-api-boilerplate/utils/password"
+
 	"github.com/gofiber/fiber"
 )
 
@@ -96,4 +100,44 @@ func Login(ctx *fiber.Ctx) {
 	// 4) If everything ok
 	// create and send the response token
 	createSendToken(result, ctx)
+}
+
+func ForgotPassword(ctx *fiber.Ctx) {
+	// getting the body the right way
+	type fpInput struct {
+		Email string `json:"email"`
+	}
+	input := new(fpInput)
+	ctx.BodyParser(input)
+	// 1) check if all needed input is here
+	if input.Email == "" {
+		abort.Msg(400, "you need to provide email input.", ctx)
+		return
+	}
+	//  2) Check if user exists
+	u := user{}
+	err := database.DB.Get(&u, queries.GetUserWithEmail(input.Email))
+	if err != nil {
+		abort.Msg(400, "no user with this email", ctx)
+		return
+	}
+
+	resetData := password.CreatePasswordResetToken()
+
+	// 3) save token reset data in db
+	_, err2 := database.DB.Exec(queries.UpdateUserPassResetData(u.ID, resetData.Prt, resetData.Pre))
+	if err2 != nil {
+		abort.Err(400, err2, ctx)
+		return
+	}
+	// 4) Send it to user's email
+	url := fmt.Sprintf("http://localhost:3001/api/auth/resetPassword/%s", resetData.Rt)
+	html := fmt.Sprintf("<b>LINK RESET YOUR PASSWORD: %s</b>", url)
+
+	_, err3 := email.SendOne("reset your password", u.Name, u.Email, url, html)
+	if err3 != nil {
+		abort.Err(400, err3, ctx)
+	}
+
+	abort.Msg(200, "email sent to your inbox", ctx)
 }

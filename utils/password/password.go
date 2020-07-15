@@ -3,6 +3,8 @@ package password
 import (
 	"crypto/rand"
 	"crypto/sha256"
+	"encoding/base64"
+	"encoding/hex"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -22,28 +24,36 @@ func changedPasswordAfter(jwtTimestamp, passwordChangedAt float64) bool {
 	return jwtTimestamp < passwordChangedAt
 }
 
-func GenRandomBytes(size int) ([]byte, error) {
-	blk := make([]byte, size)
-	_, err := rand.Read(blk)
-	return blk, err
+type createPasswordResetTokenResult struct {
+	Rt  string
+	Prt string
+	Pre int64
 }
 
-type createPasswordResetTokenResult struct {
-	resetToken            []byte
-	password_reset_token  []byte
-	password_reset_expire int64
+func GenRandomStringFromBytes(size int) (string, error) {
+	b := make([]byte, size)
+	_, err := rand.Read(b)
+	str := base64.URLEncoding.EncodeToString(b)
+	return str, err
+}
+
+func cryptString(str string) string {
+	b := []byte(str)
+	h := sha256.New()
+	h.Write(b)
+	c := h.Sum(nil)
+	crypted := hex.EncodeToString(c) // String representation
+	return crypted
 }
 
 func CreatePasswordResetToken() createPasswordResetTokenResult {
 
-	resetToken, err := GenRandomBytes(32)
+	resetToken, err := GenRandomStringFromBytes(32)
 	if err != nil {
 		panic(err)
 	}
-	h := sha256.New()
-	h.Write(resetToken)
 
-	password_reset_token := h.Sum(nil)
+	password_reset_token := cryptString(resetToken)
 
 	password_reset_expire := time.Now().Unix() + 10*60
 
