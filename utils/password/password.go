@@ -37,7 +37,7 @@ func GenRandomStringFromBytes(size int) (string, error) {
 	return str, err
 }
 
-func cryptString(str string) string {
+func CryptString(str string) string {
 	b := []byte(str)
 	h := sha256.New()
 	h.Write(b)
@@ -47,13 +47,12 @@ func cryptString(str string) string {
 }
 
 func CreatePasswordResetToken() createPasswordResetTokenResult {
-
 	resetToken, err := GenRandomStringFromBytes(32)
 	if err != nil {
 		panic(err)
 	}
 
-	password_reset_token := cryptString(resetToken)
+	password_reset_token := CryptString(resetToken)
 
 	password_reset_expire := time.Now().Unix() + 10*60
 

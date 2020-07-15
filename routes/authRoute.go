@@ -14,6 +14,6 @@ func SetupAuthRoute(app *fiber.App) {
 	auth.Post("/signup", authController.Signup)
 	auth.Post("/login", authController.Login)
 	auth.Post("/forgotPassword", authController.ForgotPassword)
-	auth.Patch("/resetPassword/:token", authController.Signup)
+	auth.Patch("/resetPassword/:token", authController.ResetPassword)
 
 }

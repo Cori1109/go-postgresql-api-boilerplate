@@ -2,6 +2,7 @@ package authController
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/Badrouu17/go-postgresql-api-boilerplate/database"
 	"github.com/Badrouu17/go-postgresql-api-boilerplate/queries"
@@ -133,11 +134,58 @@ func ForgotPassword(ctx *fiber.Ctx) {
 	// 4) Send it to user's email
 	url := fmt.Sprintf("http://localhost:3001/api/auth/resetPassword/%s", resetData.Rt)
 	html := fmt.Sprintf("<b>LINK RESET YOUR PASSWORD: %s</b>", url)
-
+	fmt.Println("📌", url)
 	_, err3 := email.SendOne("reset your password", u.Name, u.Email, url, html)
 	if err3 != nil {
 		abort.Err(400, err3, ctx)
 	}
 
 	abort.Msg(200, "email sent to your inbox", ctx)
+}
+
+func ResetPassword(ctx *fiber.Ctx) {
+	// 1) Get user based on the token
+	token := ctx.Params("token")
+	fmt.Println("🚨", token)
+
+	crypted := password.CryptString(token)
+	now := time.Now().Unix()
+
+	//  2) Check if user exists
+	u := user{}
+	err := database.DB.Get(&u, queries.GetUserByResetToken(crypted, now))
+	if err != nil {
+		abort.Msg(400, "Token is invalid or has expired", ctx)
+		return
+	}
+	// 3) hash an Update password, changedPasswordAt property for the user
+
+	// getting the body the right way
+	type rpInput struct {
+		NewPassword string `json:"newPassword"`
+	}
+	input := new(rpInput)
+	ctx.BodyParser(input)
+	// check if all needed input is here
+	if input.NewPassword == "" {
+		abort.Msg(400, "you need to provide new password input.", ctx)
+		return
+	}
+
+	// hashing the newPassword
+	hashed, hachingErr := password.HashPassword(input.NewPassword)
+	if hachingErr != nil {
+		abort.Err(500, hachingErr, ctx)
+		return
+	}
+	now2 := time.Now().Unix()
+
+	// update changes to db
+	_, err2 := database.DB.Exec(queries.ResetPassword(u.ID, hashed, now2))
+	if err2 != nil {
+		abort.Err(400, err2, ctx)
+		return
+	}
+
+	createSendToken(u, ctx)
 }
