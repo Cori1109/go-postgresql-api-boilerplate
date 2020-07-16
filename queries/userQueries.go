@@ -11,7 +11,7 @@ func GetUserWithEmail(email string) string {
 }
 
 func GetUserWithId(id int) string {
-	return fmt.Sprintf("SELECT id,name,email,photo,password,password_changed_at FROM users_user WHERE users_user.id = %d", id)
+	return fmt.Sprintf("SELECT id,name,email,password_changed_at FROM users_user WHERE id = %d", id)
 }
 
 func UpdateUserPassResetData(id int, prt string, pre int64) string {
@@ -23,7 +23,7 @@ func GetUserByResetToken(prt string, now int64) string {
 }
 
 func ResetPassword(id int, ps string, pca int64) string {
-	return fmt.Sprintf("UPDATE users_user SET password = '%s', password_reset_token = NULL, password_reset_expires = NULL, password_changed_at = %d WHERE id = %d", ps, pca, id)
+	return fmt.Sprintf("UPDATE users_user SET password = '%s', password_reset_token = NULL, password_reset_expires = 0, password_changed_at = %d WHERE id = %d", ps, pca, id)
 }
 
 func UpdateUserEmail(id int, email string) string {

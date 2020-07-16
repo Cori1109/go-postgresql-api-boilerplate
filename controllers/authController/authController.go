@@ -2,6 +2,7 @@ package authController
 
 import (
 	"fmt"
+
 	"time"
 
 	"github.com/Badrouu17/go-postgresql-api-boilerplate/database"
@@ -16,14 +17,14 @@ import (
 )
 
 type user struct {
-	ID                   int
-	Name                 string
-	Email                string
-	Photo                string
-	Password             string
-	PasswordChangedAt    int32
-	PasswordResetToken   string
-	PasswordResetExpires int32
+	ID                     int
+	Name                   string
+	Email                  string
+	Photo                  string
+	Password               string
+	Password_changed_at    float64
+	Password_reset_token   string
+	Password_reset_expires float64
 }
 
 func createSendToken(u user, ctx *fiber.Ctx) {
@@ -98,7 +99,7 @@ func Login(ctx *fiber.Ctx) {
 		abort.Msg(401, "the password you enterd is wrong, please try again", ctx)
 		return
 	}
-	// 4) If everything ok
+	// 4) If everything is ok
 	// create and send the response token
 	createSendToken(result, ctx)
 }
@@ -146,7 +147,6 @@ func ForgotPassword(ctx *fiber.Ctx) {
 func ResetPassword(ctx *fiber.Ctx) {
 	// 1) Get user based on the token
 	token := ctx.Params("token")
-	fmt.Println("🚨", token)
 
 	crypted := password.CryptString(token)
 	now := time.Now().Unix()
@@ -188,4 +188,37 @@ func ResetPassword(ctx *fiber.Ctx) {
 	}
 
 	createSendToken(u, ctx)
+}
+
+// auth protection middleware
+func Protect(ctx *fiber.Ctx) {
+	// 1) check if there is a token and it is valid
+	token := ctx.Cookies("jwt", "empty")
+	if token == "empty" {
+		abort.Msg(401, "You are not logged in! Please log in to get access.", ctx)
+	}
+	// token Verification
+	valid, tokenDetails := jwt.VerifyToken(token)
+	if !valid {
+		abort.Msg(401, "invalid token.", ctx)
+	}
+
+	// 2) Check if user still exists
+	id := int(tokenDetails.Id.(float64))
+	iat := tokenDetails.Iat.(float64)
+
+	result := user{}
+	err := database.DB.Get(&result, queries.GetUserWithId(id))
+	if err != nil {
+		abort.Msg(401, "The user belonging to this token does no longer exist.", ctx)
+		return
+	}
+	// 3) Check if user changed password after the token was issued
+	if password.ChangedPasswordAfter(iat, result.Password_changed_at) {
+		abort.Msg(401, "User recently changed password! Please log in again.", ctx)
+	}
+
+	// GRANT ACCESS TO PROTECTED ROUTE
+	ctx.Locals("user", result)
+	ctx.Next()
 }

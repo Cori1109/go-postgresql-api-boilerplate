@@ -20,8 +20,8 @@ func CheckPasswordHash(currentPassword, newPassword string) bool {
 	return err == nil
 }
 
-func changedPasswordAfter(jwtTimestamp, passwordChangedAt float64) bool {
-	return jwtTimestamp < passwordChangedAt
+func ChangedPasswordAfter(jwtIat, passwordChangedAt float64) bool {
+	return jwtIat < passwordChangedAt
 }
 
 type createPasswordResetTokenResult struct {

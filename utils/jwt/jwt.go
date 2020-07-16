@@ -23,7 +23,13 @@ func SignToken(id int) (string, error) {
 	return tokenString, err
 }
 
-func CheckToken(tokenString string) bool {
+type TokenDetails struct {
+	Id  interface{}
+	Iat interface{}
+	Exp interface{}
+}
+
+func VerifyToken(tokenString string) (bool, TokenDetails) {
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		// Don't forget to validate the alg is what you expect:
@@ -35,11 +41,14 @@ func CheckToken(tokenString string) bool {
 		return []byte(os.Getenv("JWT_SECRET")), nil
 	})
 
+	var td TokenDetails
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		fmt.Println(claims["id"], claims["iat"], claims["exp"])
-		return true
+		td := TokenDetails{
+			claims["id"], claims["iat"], claims["exp"],
+		}
+		return true, td
 	}
 
 	fmt.Println(err)
-	return false
+	return false, td
 }

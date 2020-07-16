@@ -1,9 +1,14 @@
 package userController
 
 import (
+	"fmt"
+
 	"github.com/gofiber/fiber"
 )
 
-func GetUser(ctx *fiber.Ctx) {
-	ctx.Send("user")
+func GetMe(ctx *fiber.Ctx) {
+	fmt.Println("🚨🚨🚨 hey from getMe")
+	fmt.Println(ctx.Locals("user"))
+
+	// ctx.Send("getMe")
 }
