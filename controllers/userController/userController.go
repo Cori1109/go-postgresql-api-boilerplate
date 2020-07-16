@@ -1,14 +1,16 @@
 package userController
 
 import (
-	"fmt"
-
+	"github.com/Badrouu17/go-postgresql-api-boilerplate/models"
 	"github.com/gofiber/fiber"
 )
 
 func GetMe(ctx *fiber.Ctx) {
-	fmt.Println("🚨🚨🚨 hey from getMe")
-	fmt.Println(ctx.Locals("user"))
-
-	// ctx.Send("getMe")
+	u := ctx.Locals("user").(models.User)
+	ctx.Status(200).JSON(&fiber.Map{
+		"status": 200,
+		"id":     u.ID,
+		"name":   u.Name,
+		"email":  u.Email,
+	})
 }

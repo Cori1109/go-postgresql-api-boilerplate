@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/Badrouu17/go-postgresql-api-boilerplate/database"
+	"github.com/Badrouu17/go-postgresql-api-boilerplate/models"
 	"github.com/Badrouu17/go-postgresql-api-boilerplate/queries"
 
 	"github.com/Badrouu17/go-postgresql-api-boilerplate/utils/abort"
@@ -16,18 +17,7 @@ import (
 	"github.com/gofiber/fiber"
 )
 
-type user struct {
-	ID                     int
-	Name                   string
-	Email                  string
-	Photo                  string
-	Password               string
-	Password_changed_at    float64
-	Password_reset_token   string
-	Password_reset_expires float64
-}
-
-func createSendToken(u user, ctx *fiber.Ctx) {
+func createSendToken(u models.User, ctx *fiber.Ctx) {
 	token, err := jwt.SignToken(u.ID)
 	if err != nil {
 		abort.Msg(500, "error making token", ctx)
@@ -64,7 +54,7 @@ func Signup(ctx *fiber.Ctx) {
 		return
 	}
 	// saving the user into the db
-	results := []user{}
+	results := []models.User{}
 	err := database.DB.Select(&results, queries.InsertUser(input.Name, input.Email, hashed))
 	if err != nil {
 		abort.Err(500, err, ctx)
@@ -88,7 +78,7 @@ func Login(ctx *fiber.Ctx) {
 		return
 	}
 	//  2) Check if user exists
-	result := user{}
+	result := models.User{}
 	err := database.DB.Get(&result, queries.GetUserWithEmail(input.Email))
 	if err != nil {
 		abort.Msg(400, "no user with this email", ctx)
@@ -117,7 +107,7 @@ func ForgotPassword(ctx *fiber.Ctx) {
 		return
 	}
 	//  2) Check if user exists
-	u := user{}
+	u := models.User{}
 	err := database.DB.Get(&u, queries.GetUserWithEmail(input.Email))
 	if err != nil {
 		abort.Msg(400, "no user with this email", ctx)
@@ -152,7 +142,7 @@ func ResetPassword(ctx *fiber.Ctx) {
 	now := time.Now().Unix()
 
 	//  2) Check if user exists
-	u := user{}
+	u := models.User{}
 	err := database.DB.Get(&u, queries.GetUserByResetToken(crypted, now))
 	if err != nil {
 		abort.Msg(400, "Token is invalid or has expired", ctx)
@@ -207,7 +197,7 @@ func Protect(ctx *fiber.Ctx) {
 	id := int(tokenDetails.Id.(float64))
 	iat := tokenDetails.Iat.(float64)
 
-	result := user{}
+	result := models.User{}
 	err := database.DB.Get(&result, queries.GetUserWithId(id))
 	if err != nil {
 		abort.Msg(401, "The user belonging to this token does no longer exist.", ctx)
