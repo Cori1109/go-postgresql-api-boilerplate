@@ -11,7 +11,7 @@ func GetUserWithEmail(email string) string {
 }
 
 func GetUserWithId(id int) string {
-	return fmt.Sprintf("SELECT id,name,email,password_changed_at FROM users_user WHERE id = %d", id)
+	return fmt.Sprintf("SELECT id,name,email,password,password_changed_at FROM users_user WHERE id = %d", id)
 }
 
 func UpdateUserPassResetData(id int, prt string, pre int64) string {
@@ -27,17 +27,13 @@ func ResetPassword(id int, ps string, pca int64) string {
 }
 
 func UpdateUserEmail(id int, email string) string {
-	return fmt.Sprintf("UPDATE users_user SET email = '%s' WHERE users_user.id = %d", email, id)
+	return fmt.Sprintf("UPDATE users_user SET email = '%s' WHERE id = %d", email, id)
 }
 
 func UpdateUserName(id int, name string) string {
-	return fmt.Sprintf("UPDATE users_user SET name = '%s' WHERE users_user.id = %d", name, id)
-}
-
-func UpdateUserPhoto(id int, photo string) string {
-	return fmt.Sprintf("UPDATE users_user SET photo = '%s' WHERE users_user.id = %d", photo, id)
+	return fmt.Sprintf("UPDATE users_user SET name = '%s' WHERE id = %d", name, id)
 }
 
 func DeleteUser(id int) string {
-	return fmt.Sprintf("DELETE FROM users_user WHERE users_user.id = %d", id)
+	return fmt.Sprintf("DELETE FROM users_user WHERE id = %d", id)
 }

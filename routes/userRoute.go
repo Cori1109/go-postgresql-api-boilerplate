@@ -13,8 +13,8 @@ func SetupUserRoute(app *fiber.App) {
 
 	// routes
 	user.Get("/getMe", userController.GetMe)
-	user.Patch("/updateMe", userController.GetMe)
-	user.Patch("/updatePassword", userController.GetMe)
-	user.Delete("/deleteMe", userController.GetMe)
+	user.Patch("/updateMe", userController.UpdateMe)
+	user.Patch("/updatePassword", authController.UpdatePassword)
+	user.Delete("/deleteMe", userController.DeleteMe)
 
 }

@@ -2,6 +2,7 @@ package authController
 
 import (
 	"fmt"
+	"strings"
 
 	"time"
 
@@ -183,14 +184,17 @@ func ResetPassword(ctx *fiber.Ctx) {
 // auth protection middleware
 func Protect(ctx *fiber.Ctx) {
 	// 1) check if there is a token and it is valid
-	token := ctx.Cookies("jwt", "empty")
-	if token == "empty" {
+	auth := strings.Split(ctx.Get("authorization"), " ")
+	if len(auth) < 2 {
 		abort.Msg(401, "You are not logged in! Please log in to get access.", ctx)
+		return
 	}
+	token := auth[1]
 	// token Verification
 	valid, tokenDetails := jwt.VerifyToken(token)
 	if !valid {
 		abort.Msg(401, "invalid token.", ctx)
+		return
 	}
 
 	// 2) Check if user still exists
@@ -206,9 +210,51 @@ func Protect(ctx *fiber.Ctx) {
 	// 3) Check if user changed password after the token was issued
 	if password.ChangedPasswordAfter(iat, result.Password_changed_at) {
 		abort.Msg(401, "User recently changed password! Please log in again.", ctx)
+		return
 	}
 
 	// GRANT ACCESS TO PROTECTED ROUTE
 	ctx.Locals("user", result)
 	ctx.Next()
+}
+
+func UpdatePassword(ctx *fiber.Ctx) {
+	// getting the body the right way
+	type rpInput struct {
+		CurrentPassword string `json:"currentPassword"`
+		NewPassword     string `json:"newPassword"`
+	}
+	input := new(rpInput)
+	ctx.BodyParser(input)
+	// check if all needed input is here
+	if input.NewPassword == "" || input.CurrentPassword == "" {
+		abort.Msg(400, "you need to provide the current password and a new password.", ctx)
+		return
+	}
+	// check if current password is correct
+	u := ctx.Locals("user").(models.User)
+	result := models.User{}
+	err := database.DB.Get(&result, queries.GetUserWithId(u.ID))
+	if err != nil {
+		abort.Msg(400, "no user with this ID", ctx)
+		return
+	}
+	if !password.CheckPasswordHash(result.Password, input.CurrentPassword) {
+		abort.Msg(401, "the password you enterd is wrong, please try again", ctx)
+		return
+	}
+	// hashing the newPassword
+	hashed, hachingErr := password.HashPassword(input.NewPassword)
+	if hachingErr != nil {
+		abort.Err(500, hachingErr, ctx)
+		return
+	}
+	now2 := time.Now().Unix()
+	// update changes to db
+	_, err2 := database.DB.Exec(queries.ResetPassword(u.ID, hashed, now2))
+	if err2 != nil {
+		abort.Err(400, err2, ctx)
+		return
+	}
+	createSendToken(u, ctx)
 }
